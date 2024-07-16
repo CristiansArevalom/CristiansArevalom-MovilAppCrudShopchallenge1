@@ -74,10 +74,10 @@ public class ProductActivity extends AppCompatActivity implements IProductView{
     private void addProduct() {
         String name = etlNombre.getText().toString().trim();
         String description = etlDescription.getText().toString().trim();
-        Double price = Double.parseDouble(etlPrecio.getText().toString());
-        Integer quantity = Integer.parseInt(etlCantidad.getText().toString());
-        // Validación de campos
-        if (!name.isEmpty() && !description.isEmpty() && price>0 && quantity>0) {
+        // aca es la razon por la que no meustra los mesnajes de error
+        if ((!etlPrecio.getText().toString().isEmpty())  && (!etlPrecio.getText().toString().isEmpty() )) {
+            Double price = Double.parseDouble(etlPrecio.getText().toString());
+            Integer quantity = Integer.parseInt(etlCantidad.getText().toString());
             ProductDTO dto = new ProductDTO();
             dto.setName(name);
             dto.setDescription(description);

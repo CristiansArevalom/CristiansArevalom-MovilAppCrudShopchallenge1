@@ -34,6 +34,30 @@ public class ProductPresenterImpl implements IProductPresenter {
 
     @Override
     public void addProduct(ProductDTO dto) {
+        view.showMessage("Test de ver si entra");
+        if (dto.getName() == null || dto.getName().isEmpty()) {
+            view.showError("El nombre no puede estar vacío");
+            return;
+        }
+        if (dto.getDescription() == null || dto.getDescription().isEmpty()) {
+            view.showError("La descripción no puede estar vacía");
+            return;
+        }
+        if (dto.getPrice() == null || dto.getPrice()<0) {
+            view.showError("El precio no puede estar vacio o menor a cero");
+            return;
+        }
+        if (dto.getQuantity() == null || dto.getQuantity()<0) {
+            view.showError("La cantidad no puede estar vacía o menor a cero");
+            return;
+        }
+        if (dto.getId()!=null) {
+            if(!dao.existById(dto.getId())) {
+                view.showError("El producto con ID " + dto.getId() + " no existe");
+            }
+            return;
+        }
+
         long result = dao.insertProduct(dto.getName(),dto.getDescription(), dto.getPrice(), dto.getQuantity());
         if(result!=-1){
             view.showMessage("Producto añadido satisfactoriamente");

@@ -4,7 +4,9 @@ package com.papel.repository;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 
 import java.util.ArrayList;
@@ -37,93 +39,127 @@ public class ProductDAO {
 
     // Método para insertar un nuevo producto en la tabla 'products'
     public long insertProduct(String name,String description,Double price, Integer quantity){
-        if(db==null){
-            this.open();
+        long insertedId = -1; // Valor por defecto si ocurre un error
+
+        try {
+            if (db == null) {
+                this.open(); // Asegurar que la base de datos esté abierta
+            }
+            ContentValues values = new ContentValues();
+            values.put("name", name);
+            values.put("description", description);
+            values.put("price", price);
+            values.put("quantity", quantity);
+
+            insertedId = db.insertOrThrow("product", null, values); // insertOrThrow lanza una excepción si falla
+        } catch (SQLException e) {
+            Log.e("SQLite", "Error al insertar producto: " + e.getMessage());
+
         }
-        ContentValues values = new ContentValues();// Objeto para almacenar los valores a insertar
-        values.put("name",name);// Inserción del nombre del producto
-        values.put("description",description);
-        values.put("price",price);
-        values.put("quantity",quantity);
-
-
-        return db.insert("product",null,values);// Ejecución de la inserción y retorno del ID del nuevo registro
+        return insertedId;
     }
     // Método para obtener todos los productos de la tabla 'products'
     public List<Product> getAllProducts(){ //pdt meter try catch
-        if(db==null){
-            this.open();
-        }
         List<Product> products = new ArrayList<>();// Lista para almacenar los productos obtenidos
-        Cursor cursor = db.rawQuery("SELECT * FROM product",null);
-        // Iteración sobre los resultados del cursor para obtener los datos de cada producto
-        if(cursor.moveToFirst()){
-            do{
-                Product product = new Product();
+        try {
+            if (db == null) {
+                this.open();
+            }
+            Cursor cursor = db.rawQuery("SELECT * FROM product", null);
+            // Iteración sobre los resultados del cursor para obtener los datos de cada producto
+            if (cursor.moveToFirst()) {
+                do {
+                    Product product = new Product();
+                    product.setId(cursor.getInt(0));
+                    product.setName(cursor.getString(1));
+                    product.setDescription(cursor.getString(2));
+                    product.setPrice(cursor.getDouble(3));
+                    product.setQuantity(cursor.getInt(4));
+                    products.add(product);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        }catch (SQLException e){
+            Log.e("SQLite", "Error al obtener todos los productos: " + e.getMessage());
+        }
+        return products;
+    }
+    // Método para actualizar los datos de un producto en la tabla 'products'
+    public int updateProduct(Integer id, String name, String description,Double price, Integer quantity) {
+        int rowsAffected = -1; // Valor por defecto
+        try {
+            if (db == null) {
+                this.open();
+            }
+            ContentValues values = new ContentValues();
+            values.put("name", name);
+            values.put("description", description);
+            values.put("price", price);
+            values.put("quantity", quantity);
+            rowsAffected = db.update("product", values, "id = ?", new String[]{String.valueOf(id)});
+        } catch (SQLException e) {
+            Log.e("SQLite", "Error al actualizar producto: " + e.getMessage());
+        }
+        return rowsAffected;
+    }
+    // Método para eliminar un producto de la tabla 'products' mediante su ID
+    public int deleteProduct(int id) {
+        int rowsDeleted = -1; // Valor por defecto
+        try {
+            if (db == null) {
+                this.open();
+            }
+            // Eliminación del producto con el ID proporcionado
+            rowsDeleted = db.delete("product", "id = ?", new String[]{String.valueOf(id)});
+        }catch (SQLException e){
+            Log.e("SQLite", "Error al eliminar producto: " + e.getMessage());
+        }
+        return rowsDeleted;
+    }
+
+    public Product findById(int id) {
+        Product product = null;
+
+        try {
+            if (db == null) {
+                this.open();
+            }
+            Cursor cursor = db.rawQuery("SELECT * FROM product WHERE id=?", new String[]{String.valueOf(id)});
+            if (cursor != null && cursor.moveToFirst()) {
+                product = new Product();
                 product.setId(cursor.getInt(0));
                 product.setName(cursor.getString(1));
                 product.setDescription(cursor.getString(2));
                 product.setPrice(cursor.getDouble(3));
                 product.setQuantity(cursor.getInt(4));
-                products.add(product);
-            }while (cursor.moveToNext());
-        }
-        cursor.close();
-        return products;
-    }
-    // Método para actualizar los datos de un producto en la tabla 'products'
-    public int updateProduct(Integer id, String name, String description,Double price, Integer quantity) {
-        boolean result=false;
-        if(db==null){
-            this.open();
-        }
-        ContentValues values = new ContentValues();
-        values.put("name", name);
-        values.put("description", description);
-        values.put("price",price);
-        values.put("quantity",quantity);
-        return db.update("product", values, "id = ?", new String[]{String.valueOf(id)});
 
-    }
-    // Método para eliminar un producto de la tabla 'products' mediante su ID
-    public int deleteProduct(int id) {
-        if(db==null){
-            this.open();
-        }
-        // Eliminación del producto con el ID proporcionado
-        return db.delete("product", "id = ?", new String[]{String.valueOf(id)});
-    }
+                cursor.close();
+            }
 
-    public Product findById(int id) {
-        if (db == null) {
-            this.open();
-        }
-        Product product = null;
-        Cursor cursor = db.rawQuery("SELECT * FROM product WHERE id=?", new String[]{String.valueOf(id)});
-        if (cursor != null && cursor.moveToFirst()) {
-            product = new Product();
-            product.setId(cursor.getInt(0));
-            product.setName(cursor.getString(1));
-            product.setDescription(cursor.getString(2));
-            product.setPrice(cursor.getDouble(3));
-            product.setQuantity(cursor.getInt(4));
+        } catch (SQLException e) {
+            Log.e("SQLite", "Error al buscar producto por ID: " + e.getMessage());
 
-            cursor.close();
         }
         return product;
+
     }
     public boolean existById(int id){
-        boolean exists=false;
-        if(db==null){
-            this.open();
+        boolean exists = false;
+        try {
+            if (db == null) {
+                this.open();
+            }
+            Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM product WHERE id=?", new String[]{String.valueOf(id)});
+            // Si el cursor tiene datos, obtener el conteo
+            if (cursor != null && cursor.moveToFirst()) {
+                int count = cursor.getInt(0);
+                exists = count > 0;
+            }
+            cursor.close();
+        }catch (SQLException e){
+            Log.e("SQLite", "Error al buscar producto por ID: " + e.getMessage());
+
         }
-        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM product WHERE id=?", new String[]{String.valueOf(id)});
-        // Si el cursor tiene datos, obtener el conteo
-        if (cursor != null && cursor.moveToFirst()) {
-            int count = cursor.getInt(0);
-            exists = count > 0;
-        }
-        cursor.close();
         return exists;
     }
 
