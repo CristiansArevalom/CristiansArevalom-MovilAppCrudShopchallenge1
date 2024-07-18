@@ -17,13 +17,13 @@ usuario y el inicio de sesión seguro.
 - Gestión de Productos: Incluye funcionalidades para añadir, actualizar, 
 eliminar y visualizar productos en el inventario.
 
-###Auteticacion
-![Autenticacion](/Assets/login-error.gif)
 
 ##Registro
+
 ![Registro](/Assets/menu-registro.gif)
 
 ###Menu Producto
+
 ![Menu Producto](/Assets/menu-producto.gif)
 
 
