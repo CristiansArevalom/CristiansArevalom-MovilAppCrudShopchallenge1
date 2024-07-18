@@ -17,6 +17,10 @@ usuario y el inicio de sesión seguro.
 - Gestión de Productos: Incluye funcionalidades para añadir, actualizar, 
 eliminar y visualizar productos en el inventario.
 
+![Autenticación](/Assets/login error.gif)
+![Registro](/Assets/menu-registro.gif)
+![Menu Producto](/Assets/menu-producto.gif)
+
 ## Diseño del Sistema
 - a. Arquitectura de la Aplicación.
     La aplicación opera en una arquitectura cliente-servidor, donde el cliente es 
