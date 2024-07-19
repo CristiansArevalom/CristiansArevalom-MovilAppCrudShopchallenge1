@@ -34,7 +34,6 @@ public class ProductPresenterImpl implements IProductPresenter {
 
     @Override
     public void addProduct(ProductDTO dto) {
-        view.showMessage("Test de ver si entra");
         if (dto.getName() == null || dto.getName().isEmpty()) {
             view.showError("El nombre no puede estar vacío");
             return;
